@@ -29,7 +29,7 @@ jobs:
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4   # <-- updated from v3 to v4
       with:
         name: LifeLearnApp-APK
         path: bin/*.apk

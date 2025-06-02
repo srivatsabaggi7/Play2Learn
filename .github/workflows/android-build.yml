@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -20,16 +21,29 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk python3-pip
+        sudo apt install -y zip unzip openjdk-17-jdk python3-pip
         pip install --upgrade pip setuptools
-        pip install buildozer cython
+        pip install cython buildozer
+
+    - name: Set up Android SDK manually
+      run: |
+        mkdir -p ~/.android
+        echo "### Accept all Android SDK licenses" 
+        yes | sdkmanager --licenses || true
+
+    - name: Configure buildozer.spec
+      run: |
+        sed -i 's/^# android.sdk_path = .*/android.sdk_path = \/opt\/android-sdk/' buildozer.spec
+        sed -i 's/^# android.ndk_path = .*/android.ndk_path = \/opt\/android-ndk/' buildozer.spec
+        sed -i 's/^# android.build_tools_version = .*/android.build_tools_version = 33.0.2/' buildozer.spec
+        sed -i 's/^# android.api = .*/android.api = 33/' buildozer.spec
 
     - name: Build APK
       run: |
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4   # <-- updated from v3 to v4
+      uses: actions/upload-artifact@v4
       with:
         name: LifeLearnApp-APK
         path: bin/*.apk
